@@ -8,6 +8,7 @@ import {
   CalendarDays,
   Languages,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -28,7 +29,9 @@ export default function Home() {
           </p>
         </div>
 
-        <Button className="hover:bg-indigo-600">Get Started</Button>
+        <Button className="hover:bg-indigo-600">
+          <Link href={"/boards"}>Get Started</Link>
+        </Button>
       </div>
 
       <div className="flex flex-col space-y-10 justify-center items-center">
