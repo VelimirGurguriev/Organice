@@ -142,6 +142,7 @@ export const createCard = (listId, title) => {
       id: Date.now(),
       title,
       position: targetList.cards.length,
+      reactions: {}, // Add this line
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
