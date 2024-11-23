@@ -55,8 +55,8 @@ export default function Header() {
 
       const result = createBoard(boardName, boardSlug);
 
-      if (result.success) {
-        router.push(`/boards/${boardSlug}`);
+      if (result.success && result.board.id) {
+        router.push(`/boards/${result.board.id}`);
         closeModal();
       } else {
         setError(result.error || "Failed to create board");

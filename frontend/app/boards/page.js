@@ -19,7 +19,7 @@ function page() {
       <h1 className="text-4xl font-bold">My Boards</h1>
       <div className="my-10 rounded-xl justify-center items-center w-2/4">
         {boards.map((board) => (
-          <Link target="_blank" href={`/boards/${board.slug}`}>
+          <Link target="_blank" href={`/boards/${board.id}`}>
             <div
               className="my-5 text-indigo-600 duration-300 ease-in-out text-3xl hover:bg-indigo-600 outline-indigo-600 hover:text-white py-20 flex justify-center items-center outline rounded-xl outline-2"
               key={board.id}

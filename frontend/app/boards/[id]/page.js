@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast, Toaster } from "sonner";
 
-import { getBoardBySlug } from "@/app/actions/boardActions";
+import { getBoardBySlug, getBoardById } from "@/app/actions/boardActions";
 import { CreateListForm } from "@/components/CreateListForm";
 import { List } from "@/components/List";
-import { Pencil, Check, X, Trash2 } from "lucide-react";
+import { Pencil, Check, X, Trash2, UserRoundPlus } from "lucide-react";
 import { AutosizeTextarea } from "@/components/ui/AutosizeTextarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,16 @@ export default function BoardPage({ params }) {
     setIsModalOpen(false);
   };
 
+  const createBoardSlug = (boardName) => {
+    return boardName
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .trim()
+      .replace(/^-+|-+$/g, "");
+  };
+
   const handleDelete = (id) => {
     const boards = JSON.parse(localStorage.getItem("boards"));
     const newBoards = boards.filter((board) => board.id !== id);
@@ -43,7 +54,7 @@ export default function BoardPage({ params }) {
   };
 
   const loadBoard = () => {
-    const boardData = getBoardBySlug(params.boardSlug);
+    const boardData = getBoardById(params.id);
     setBoard(boardData);
     setEditedName(boardData?.name || "");
     setLoading(false);
@@ -51,7 +62,7 @@ export default function BoardPage({ params }) {
 
   useEffect(() => {
     loadBoard();
-  }, [params.boardSlug]);
+  }, [params.id]);
 
   const handleEditName = () => {
     setIsEditing(true);
@@ -65,15 +76,20 @@ export default function BoardPage({ params }) {
 
     // Get current boards from localStorage
     const boards = JSON.parse(localStorage.getItem("boards") || "[]");
+    const newSlug = createBoardSlug(editedName);
 
     // Find and update the current board
     const boardIndex = boards.findIndex((b) => b.id === board.id);
     if (boardIndex !== -1) {
       boards[boardIndex].name = editedName;
+      boards[boardIndex].slug = newSlug;
       boards[boardIndex].updatedAt = new Date().toISOString();
 
       // Save back to localStorage
       localStorage.setItem("boards", JSON.stringify(boards));
+
+      // Show success message
+      toast.success("Board name updated successfully");
 
       // Reload board data
       loadBoard();
@@ -97,51 +113,60 @@ export default function BoardPage({ params }) {
 
   return (
     <div className="p-6">
-      <div className="flex items-center gap-4 mb-4">
-        {isEditing ? (
-          <div className="flex items-center gap-2">
-            <AutosizeTextarea
-              type="text"
-              value={editedName}
-              onChange={(e) => setEditedName(e.target.value)}
-              className="text-2xl font-bold w-auto min-w-[200px]"
-              autoFocus
-            />
-            <button
-              onClick={handleSaveName}
-              className="p-1 hover:bg-green-100 rounded"
-            >
-              <Check size={20} className="text-green-600" />
-            </button>
-            <button
-              onClick={handleCancelEdit}
-              className="p-1 hover:bg-red-100 rounded"
-            >
-              <X size={20} className="text-red-600" />
-            </button>
-          </div>
-        ) : (
-          <>
-            <h1 className="text-2xl font-bold max-w-xs overflow-hidden break-words">
-              {board.name}
-            </h1>
-            <button
-              onClick={handleEditName}
-              className="p-1 hover:bg-gray-100 rounded"
-            >
-              <Pencil size={20} className="text-gray-600" />
-            </button>
-            <button
-              className="p-1 hover:bg-gray-100 rounded"
-              onClick={openModal}
-            >
-              <Trash2 />
-            </button>
-          </>
-        )}
+      <div className="flex bg-indigo-100 rounded-xl p-5 items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <AutosizeTextarea
+                type="text"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                className="text-2xl font-bold w-auto min-w-[200px]"
+                autoFocus
+              />
+              <button
+                onClick={handleSaveName}
+                className="p-1 hover:bg-green-100 rounded"
+              >
+                <Check size={20} className="text-green-600" />
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="p-1 hover:bg-red-100 rounded"
+              >
+                <X size={20} className="text-red-600" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold max-w-xs overflow-hidden break-words">
+                {board.name}
+              </h1>
+              <button
+                onClick={handleEditName}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <Pencil size={20} className="text-gray-600" />
+              </button>
+              <button
+                className="p-1 hover:bg-gray-100 rounded"
+                onClick={openModal}
+              >
+                <Trash2 />
+              </button>
+            </>
+          )}
+        </div>
+        <button
+          onClick={() => {
+            /* Add your share handler here */
+          }}
+          className="p-4 bg-gray-100 transition-all duration-300 hover:bg-white rounded-full flex items-center gap-2 text-gray-600"
+        >
+          <UserRoundPlus size={20} />
+          Share
+        </button>
       </div>
-
-      <CreateListForm boardId={board.id} onListCreated={loadBoard} />
 
       <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         {board.lists?.map((list) => (
@@ -152,6 +177,8 @@ export default function BoardPage({ params }) {
             onUpdate={loadBoard}
           />
         ))}
+
+        <CreateListForm boardId={board.id} onListCreated={loadBoard} />
       </div>
 
       {isModalOpen && (

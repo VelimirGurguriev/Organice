@@ -29,14 +29,6 @@ export const createBoard = (boardName, boardSlug) => {
   try {
     const boards = getBoards();
 
-    // Check if board with slug already exists
-    if (boards.some((board) => board.slug === boardSlug)) {
-      return {
-        success: false,
-        error: "A board with this name already exists",
-      };
-    }
-
     const id = generateRandomId(16);
 
     const newBoard = {
@@ -166,6 +158,25 @@ export const createCard = (listId, title) => {
 export const getBoardBySlug = (slug) => {
   const boards = getBoards();
   const board = boards.find((board) => board.slug === slug);
+
+  if (!board) {
+    return null;
+  }
+
+  // Ensure lists are sorted by position
+  board.lists = (board.lists || []).sort((a, b) => a.position - b.position);
+
+  // Ensure cards in each list are sorted by position
+  board.lists.forEach((list) => {
+    list.cards = (list.cards || []).sort((a, b) => a.position - b.position);
+  });
+
+  return board;
+};
+
+export const getBoardById = (id) => {
+  const boards = getBoards();
+  const board = boards.find((board) => board.id === id);
 
   if (!board) {
     return null;
