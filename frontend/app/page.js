@@ -30,7 +30,7 @@ export default function Home() {
         </div>
 
         <Button className="hover:bg-indigo-600">
-          <Link href={"/boards"}>Get Started</Link>
+          <Link href={"/login"}>Get Started</Link>
         </Button>
       </div>
 
