@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Check, X, Smile } from "lucide-react";
 import { AutosizeTextarea } from "./ui/AutosizeTextarea";
+import { deleteCard } from "@/app/actions/boardActions";
 
 const EMOJI_OPTIONS = ["👍", "❤️", "😄", "🎉", "🚀", "👀"];
 
