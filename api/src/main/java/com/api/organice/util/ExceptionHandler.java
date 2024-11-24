@@ -1,5 +1,6 @@
 package com.api.organice.util;
 
+import com.api.organice.util.exception.ApiException;
 import org.slf4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,13 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
         HttpErrorResponse response = HttpErrorResponse.of("Unprocessable entity", 422, errors, generalErrors);
 
         return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(ApiException.class)
+    public ResponseEntity<HttpErrorResponse> handleException(ApiException ex) {
+        log.error("Handling ApiException: {}", ex.getMessage());
+        var response = HttpErrorResponse.of(ex.getMessage(), ex.getStatus(), ex.getErrors(), null);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(ex.getStatus()));
     }
 
     @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
