@@ -14,7 +14,7 @@ import org.hibernate.validator.constraints.Length;
 @Builder
 public class CreateUserRequest {
     @Email
-    @Unique(columnName = "email", tableName = "user", message = "User with this email already exists")
+    @Unique(columnName = "email", tableName = "users", message = "User with this email already exists")
     private String email;
     @NotNull
     @Length(min = 8)
