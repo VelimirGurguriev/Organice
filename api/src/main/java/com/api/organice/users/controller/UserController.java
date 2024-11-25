@@ -1,6 +1,7 @@
 package com.api.organice.users.controller;
 
 
+import com.api.organice.auth.data.ForgotPasswordRequest;
 import com.api.organice.config.ApplicationProperties;
 import com.api.organice.users.data.CreateUserRequest;
 import com.api.organice.users.data.UserResponse;
@@ -29,5 +30,11 @@ public class UserController {
     public RedirectView verifyEmail(@RequestParam String token) {
         userService.verifyEmail(token);
         return new RedirectView(applicationProperties.getLoginPageUrl());
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+        userService.forgotPassword(req.getEmail());
+        return ResponseEntity.ok().build();
     }
 }

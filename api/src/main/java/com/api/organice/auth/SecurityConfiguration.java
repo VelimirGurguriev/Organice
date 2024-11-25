@@ -42,13 +42,15 @@ public class SecurityConfiguration {
                     .requestMatchers(antMatcher(HttpMethod.POST, "/api/users")).permitAll()
                     .requestMatchers(antMatcher(HttpMethod.POST, "/api/auth/login")).permitAll()
                     .requestMatchers(antMatcher(HttpMethod.GET, "/api/users/verify-email")).permitAll()
+                    .requestMatchers(antMatcher(HttpMethod.POST, "/api/user/forgot-password")).permitAll()
                     .anyRequest().authenticated();
         });
 
         http.exceptionHandling(customizer -> {
             customizer.authenticationEntryPoint((request, response, authException) -> {
-                response.setStatus(401); // Send 401 status
-                response.setContentType("application/json");
+//                response.setStatus(401); // Send 401 status
+//                response.setContentType("application/json");
+                response.sendError(401, "Unauthorized");
             });
         });
 
