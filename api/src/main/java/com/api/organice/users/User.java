@@ -24,6 +24,7 @@ public class User extends AbstractEntity implements UserDetails {
     private String email;
     private String username;
     private String password;
+    @Setter
     private boolean verified = false;
     @Enumerated(EnumType.STRING)
     private Role role;

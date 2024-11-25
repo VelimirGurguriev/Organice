@@ -41,6 +41,7 @@ public class SecurityConfiguration {
             customizer
                     .requestMatchers(antMatcher(HttpMethod.POST, "/api/users")).permitAll()
                     .requestMatchers(antMatcher(HttpMethod.POST, "/api/auth/login")).permitAll()
+                    .requestMatchers(antMatcher(HttpMethod.GET, "/api/users/verify-email")).permitAll()
                     .anyRequest().authenticated();
         });
 

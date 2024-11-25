@@ -7,6 +7,7 @@ import com.api.organice.users.data.UserResponse;
 import com.api.organice.users.jobs.SendWelcomeEmailJob;
 import com.api.organice.users.repository.UserRepository;
 import com.api.organice.users.repository.VerificationCodeRepository;
+import com.api.organice.util.exception.ApiException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +35,15 @@ public class UserService {
         verificationCodeRepository.save(verificationCode);
         SendWelcomeEmailJob sendWelcomeEmailJob = new SendWelcomeEmailJob(user.getId());
         BackgroundJobRequest.enqueue(sendWelcomeEmailJob);
+    }
+
+    @Transactional
+    public void verifyEmail(String code) {
+        VerificationCode verificationCode = verificationCodeRepository.findByCode(code)
+                .orElseThrow(() -> ApiException.builder().status(400).message("Invalid token").build());
+        User user = verificationCode.getUser();
+        user.setVerified(true);
+        userRepository.save(user);
+        verificationCodeRepository.delete(verificationCode);
     }
 }
