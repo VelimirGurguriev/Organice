@@ -29,7 +29,7 @@ public class PasswordResetToken extends AbstractEntity {
         this.token = RandomStringUtils.random(6, false, true);
     }
 
-    private boolean isExpired() {
+    public boolean isExpired() {
         return LocalDateTime.now().isAfter(expiresAt);
     }
 

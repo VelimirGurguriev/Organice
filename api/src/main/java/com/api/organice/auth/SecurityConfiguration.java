@@ -13,6 +13,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,15 +43,27 @@ public class SecurityConfiguration {
                     .requestMatchers(antMatcher(HttpMethod.POST, "/api/users")).permitAll()
                     .requestMatchers(antMatcher(HttpMethod.POST, "/api/auth/login")).permitAll()
                     .requestMatchers(antMatcher(HttpMethod.GET, "/api/users/verify-email")).permitAll()
-                    .requestMatchers(antMatcher(HttpMethod.POST, "/api/user/forgot-password")).permitAll()
+                    .requestMatchers(antMatcher(HttpMethod.POST, "/api/users/forgot-password")).permitAll()
+                    .requestMatchers(antMatcher(HttpMethod.PATCH, "/api/users/reset-password")).permitAll()
                     .anyRequest().authenticated();
         });
 
+//        http.authorizeHttpRequests(customizer -> {
+//            customizer
+//                    .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+//                    .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+//                    .requestMatchers(HttpMethod.GET, "/api/users/verify-email").permitAll()
+//                    .requestMatchers(HttpMethod.POST, "/api/users/forgot-password").permitAll()
+//                    .requestMatchers(HttpMethod.PATCH, "/api/users/reset-password").permitAll()
+//                    .anyRequest().authenticated();
+//        });
+
         http.exceptionHandling(customizer -> {
-            customizer.authenticationEntryPoint((request, response, authException) -> {
+            customizer.authenticationEntryPoint(
+                    (request, response, authException) -> {
+                        response.sendError(401, "Unauthorized");
 //                response.setStatus(401); // Send 401 status
 //                response.setContentType("application/json");
-                response.sendError(401, "Unauthorized");
             });
         });
 
@@ -77,6 +90,9 @@ public class SecurityConfiguration {
             customizer.configurationSource(corsConfigurationSource());
         });
 
+//        http.sessionManagement(sessionManagement ->
+//                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         return http.build();
     }
 
@@ -91,7 +107,7 @@ public class SecurityConfiguration {
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                 CorsConfiguration config = new CorsConfiguration();
                 config.setAllowedOrigins(applicationProperties.getAllowedOrigins());
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
                 config.setAllowedHeaders(List.of("*"));
                 config.setAllowCredentials(true);
                 return config;
