@@ -2,6 +2,7 @@ package com.api.organice.users;
 
 import com.api.organice.entity.AbstractEntity;
 import com.api.organice.users.data.CreateUserRequest;
+import com.api.organice.users.data.UpdateUserRequest;
 import com.api.organice.util.ApplicationContextProvider;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -22,8 +23,11 @@ import java.util.List;
 @NoArgsConstructor
 public class User extends AbstractEntity implements UserDetails {
     private String email;
+    @Setter
     private String username;
     private String password;
+    private String firstName;
+    private String lastName;
     @Setter
     private boolean verified = false;
     @Enumerated(EnumType.STRING)
@@ -39,6 +43,11 @@ public class User extends AbstractEntity implements UserDetails {
         this.password = passwordEncoder.encode(data.getPassword());
         this.username = data.getUsername();
         this.role = Role.USER;
+    }
+
+    public void update(UpdateUserRequest request) {
+        this.firstName = request.getFirstName();
+        this.lastName = request.getLastName();
     }
 
     public void updatePassword(String newPassword) {

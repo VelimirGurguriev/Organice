@@ -5,6 +5,7 @@ import com.api.organice.auth.data.ForgotPasswordRequest;
 import com.api.organice.config.ApplicationProperties;
 import com.api.organice.users.data.CreateUserRequest;
 import com.api.organice.users.data.UpdateUserPasswordRequest;
+import com.api.organice.users.data.UpdateUserRequest;
 import com.api.organice.users.data.UserResponse;
 import com.api.organice.users.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import org.springframework.web.servlet.view.RedirectView;
+
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -50,6 +53,12 @@ public class UserController {
     public ResponseEntity<UserResponse> updatePassword(
             @Valid @RequestBody UpdateUserPasswordRequest requestDTO) {
         UserResponse user = userService.updatePassword(requestDTO);
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> update(@Valid @RequestBody UpdateUserRequest request) {
+        UserResponse user = userService.update(request);
         return ResponseEntity.ok(user);
     }
 

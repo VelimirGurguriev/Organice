@@ -6,6 +6,7 @@ import com.api.organice.users.User;
 import com.api.organice.users.VerificationCode;
 import com.api.organice.users.data.CreateUserRequest;
 import com.api.organice.users.data.UpdateUserPasswordRequest;
+import com.api.organice.users.data.UpdateUserRequest;
 import com.api.organice.users.data.UserResponse;
 import com.api.organice.users.jobs.SendResetPasswordEmailJob;
 import com.api.organice.users.jobs.SendWelcomeEmailJob;
@@ -87,6 +88,15 @@ public class UserService {
         }
 
         user.updatePassword(request.getPassword());
+        user = userRepository.save(user);
+        return new UserResponse(user);
+    }
+
+    @Transactional
+    public UserResponse update(UpdateUserRequest request) {
+        User user = SecurityUtil.getAuthenticatedUser();
+        user = userRepository.getReferenceById(user.getId());
+        user.update(request);
         user = userRepository.save(user);
         return new UserResponse(user);
     }
