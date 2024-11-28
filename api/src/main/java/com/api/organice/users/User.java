@@ -42,6 +42,8 @@ public class User extends AbstractEntity implements UserDetails {
         this.email = data.getEmail();
         this.password = passwordEncoder.encode(data.getPassword());
         this.username = data.getUsername();
+        this.firstName = data.getFirstName();
+        this.lastName = data.getLastName();
         this.role = Role.USER;
     }
 

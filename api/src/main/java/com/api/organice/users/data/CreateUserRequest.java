@@ -23,4 +23,6 @@ public class CreateUserRequest {
     private String password;
     private String passwordConfirmation;
     private String username;
+    private String firstName;
+    private String lastName;
 }
