@@ -8,7 +8,16 @@ import { createCard, deleteList } from "@/app/actions/boardActions";
 import { Pencil, Trash2, Check, X } from "lucide-react";
 import { AutosizeTextarea } from "./ui/AutosizeTextarea";
 
-export function List({ list, boardId, onUpdate }) {
+export function List({
+  list,
+  boardId,
+  onUpdate,
+  openComments,
+  closeComments,
+  isCommentsOpen,
+  listId,
+  addCommentToCard,
+}) {
   const [newCardTitle, setNewCardTitle] = useState("");
   const [isAddingCard, setIsAddingCard] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -248,9 +257,13 @@ export function List({ list, boardId, onUpdate }) {
       <div className="space-y-2 mb-4">
         {sortedCards.map((card) => (
           <Card
+            openComments={openComments}
+            closeComments={closeComments}
+            isCommentsOpen={isCommentsOpen}
             listId={list.id}
             key={card.id}
             card={card}
+            addCommentToCard={addCommentToCard}
             onCardUpdate={handleCardUpdate}
             isDraggable={true}
           />

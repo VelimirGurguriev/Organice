@@ -137,6 +137,7 @@ export const createCard = (listId, title) => {
       reactions: {}, // Add this line
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      comments: [],
     };
 
     targetList.cards.push(newCard);
@@ -289,6 +290,66 @@ export const deleteCard = (listId, cardId) => {
     return { success: true };
   } catch (error) {
     console.error("Error deleting card:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+// Add a comment to a card
+export const addCommentToCard = (listId, cardId, comment) => {
+  try {
+    const boards = getBoards();
+
+    // Find the board and list
+    let boardIndex = -1;
+    let listIndex = -1;
+
+    for (let i = 0; i < boards.length; i++) {
+      const board = boards[i];
+      const lIndex = board.lists?.findIndex((list) => list.id === listId);
+      if (lIndex !== -1) {
+        boardIndex = i;
+        listIndex = lIndex;
+        break;
+      }
+    }
+
+    if (boardIndex === -1 || listIndex === -1) {
+      return {
+        success: false,
+        error: "List not found",
+      };
+    }
+
+    const targetList = boards[boardIndex].lists[listIndex];
+    const cardIndex = targetList.cards.findIndex((card) => card.id === cardId);
+
+    if (cardIndex === -1) {
+      return {
+        success: false,
+        error: "Card not found",
+      };
+    }
+
+    const targetCard = targetList.cards[cardIndex];
+
+    // Add the new comment
+    const newComment = {
+      id: Date.now(), // Use timestamp as a unique comment ID
+      text: comment,
+      createdAt: new Date().toISOString(),
+    };
+
+    targetCard.comments.push(newComment);
+    targetCard.updatedAt = new Date().toISOString();
+    boards[boardIndex].updatedAt = new Date().toISOString();
+    saveBoards(boards);
+
+    return { success: true, comment: newComment };
+  } catch (error) {
+    console.error("Error adding comment:", error);
     return {
       success: false,
       error: error.message,

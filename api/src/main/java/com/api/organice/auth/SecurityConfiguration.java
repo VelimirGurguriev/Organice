@@ -36,6 +36,11 @@ public class SecurityConfiguration {
     private final ApplicationProperties applicationProperties;
     private final UserDetailsService userDetailsService;
 
+    public SecurityConfiguration(ApplicationProperties applicationProperties, UserDetailsService userDetailsService) {
+        this.applicationProperties = applicationProperties;
+        this.userDetailsService = userDetailsService;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(customizer -> {

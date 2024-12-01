@@ -19,6 +19,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { openComments, closeComments, isCommentsOpen } from "@/components/Card";
+import { Textarea } from "@/components/ui/textarea";
+import { addCommentToCard } from "@/app/actions/boardActions";
+import { getBoards } from "@/app/actions/boardActions";
 
 export default function BoardPage({ params }) {
   const [board, setBoard] = useState(null);
@@ -27,6 +31,80 @@ export default function BoardPage({ params }) {
   const [editedName, setEditedName] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState(null);
+  const [selectedListId, setSelectedListId] = useState(null);
+  const [comment, setComment] = useState(""); // Track the comment text
+  const [comments, setComments] = useState({}); // Store comments by cardId
+  const [boards, setBoards] = useState(getBoards());
+
+  const openComments = (cardId, listId) => {
+    setIsCommentsOpen(true);
+    console.log("CardId:", cardId);
+    console.log("List id:", listId);
+    setSelectedCardId(cardId);
+    setSelectedListId(listId);
+  };
+
+  const closeComments = () => {
+    setIsCommentsOpen(false);
+    setSelectedCardId(null); // Close the comment box
+    setSelectedListId(null);
+    setComment(""); // Clear the comment text
+  };
+
+  // Handle the comment form submission
+  const handleAddComment = async () => {
+    if (comment.trim() === "") return; // Don't submit empty comments
+
+    const result = addCommentToCard(selectedListId, selectedCardId, comment);
+    if (result.success) {
+      // Update local state with the new comment
+      const newComment = result.comment;
+
+      // Find the updated card and update the UI
+      setBoards((prevBoards) => {
+        return prevBoards.map((board) => {
+          if (board.id === params.id) {
+            return {
+              ...board,
+              lists: board.lists.map((list) => {
+                if (list.id === selectedListId) {
+                  return {
+                    ...list,
+                    cards: list.cards.map((card) => {
+                      if (card.id === selectedCardId) {
+                        return {
+                          ...card,
+                          comments: [...card.comments, newComment], // Add new comment
+                        };
+                      }
+                      return card;
+                    }),
+                  };
+                }
+                return list;
+              }),
+            };
+          }
+          return board;
+        });
+      });
+
+      setComment(""); // Clear the comment input
+    } else {
+      console.error(result.error); // Handle error if any
+    }
+  };
+
+  const openShare = () => {
+    setIsShareOpen(true);
+  };
+
+  const closeShare = () => {
+    setIsShareOpen(false);
+  };
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -159,7 +237,7 @@ export default function BoardPage({ params }) {
         </div>
         <button
           onClick={() => {
-            /* Add your share handler here */
+            openShare();
           }}
           className="p-4 bg-gray-100 transition-all duration-300 hover:bg-white rounded-full flex items-center gap-2 text-gray-600"
         >
@@ -171,10 +249,15 @@ export default function BoardPage({ params }) {
       <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         {board.lists?.map((list) => (
           <List
+            openComments={openComments}
+            closeComments={closeComments}
+            isCommentsOpen={isCommentsOpen}
             key={list.id}
             list={list}
+            listId={list.id}
             boardId={board.id}
             onUpdate={loadBoard}
+            addCommentToCard={addCommentToCard}
           />
         ))}
 
@@ -221,6 +304,102 @@ export default function BoardPage({ params }) {
                 </Button>
               </CardFooter>
             </Card>
+          </div>
+        </div>
+      )}
+
+      {isShareOpen && (
+        <div onClick={closeShare} className="fixed inset-0 bg-black/50 z-50">
+          <div className="h-full w-full flex items-center justify-center">
+            <Card
+              onClick={(e) => e.stopPropagation()}
+              className="w-[350px] relative"
+            >
+              <CardHeader className="flex flex-row justify-between items-center">
+                <CardTitle>Share</CardTitle>
+                <X
+                  onClick={() => {
+                    closeShare();
+                  }}
+                  className="hover:cursor-pointer"
+                ></X>
+              </CardHeader>
+              <CardContent>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit();
+                  }}
+                  className="flex flex-row justify-between items-center space-x-5"
+                >
+                  <div className="grid w-full items-center gap-4">
+                    <div className="flex flex-col space-y-1.5">
+                      <Input id="email" required placeholder="Email address" />
+                    </div>
+                  </div>
+
+                  <Button>Share</Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {isCommentsOpen && (
+        <div
+          onClick={() => closeComments()}
+          className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="h-2/4 overflow-auto space-y-5 p-10 bg-white w-2/4 rounded-lg"
+          >
+            <div className="sticky flex flex-row justify-between -top-4 bg-white/70 z-10 p-2 mb-2">
+              <h1>Comments</h1>
+              <X
+                className="hover:cursor-pointer"
+                onClick={() => closeComments()}
+              />
+            </div>
+            <div className="space-y-3">
+              <Textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Write a comment..."
+              ></Textarea>
+              <Button
+                onClick={() => {
+                  if (comment) handleAddComment();
+                  else {
+                    alert("Comment must not be empty!");
+                  }
+                }}
+                disabled={!comment}
+              >
+                Post Comment
+              </Button>
+            </div>
+            <div>
+              {selectedCardId && (
+                <div>
+                  <div className="space-y-3">
+                    {/* Render comments for selected card */}
+                    {getBoardById(params.id)
+                      ?.lists.find((list) => list.id === selectedListId)
+                      ?.cards.find((card) => card.id === selectedCardId)
+                      ?.comments.map((comment) => (
+                        <p
+                          className="bg-gray-100 p-3 rounded-xl"
+                          key={comment.id}
+                        >
+                          {comment.text}
+                        </p>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

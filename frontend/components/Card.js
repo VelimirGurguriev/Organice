@@ -7,7 +7,7 @@ import { deleteCard } from "@/app/actions/boardActions";
 
 const EMOJI_OPTIONS = ["👍", "❤️", "😄", "🎉", "🚀", "👀"];
 
-function EmojiReactions({ reactions, onReactionAdd }) {
+function EmojiReactions({ reactions, onReactionAdd, closeComments }) {
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
 
@@ -41,7 +41,10 @@ function EmojiReactions({ reactions, onReactionAdd }) {
       {/* Emoji picker container */}
       <div ref={pickerRef}>
         <button
-          onClick={() => setShowPicker(!showPicker)}
+          onClick={(e) => {
+            setShowPicker(!showPicker);
+            e.stopPropagation();
+          }}
           className="p-1 hover:bg-gray-100 rounded"
         >
           <Smile size={15} className="text-gray-600" />
@@ -49,13 +52,17 @@ function EmojiReactions({ reactions, onReactionAdd }) {
 
         {/* Emoji picker dropdown - now positioned fixed relative to viewport */}
         {showPicker && (
-          <div className="fixed bg-white shadow-lg rounded-lg border p-3 z-50 flex flex-row gap-2">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="fixed bg-white shadow-lg rounded-lg border p-3 z-50 flex flex-row gap-2"
+          >
             {EMOJI_OPTIONS.map((emoji) => (
               <button
                 key={emoji}
-                onClick={() => {
+                onClick={(e) => {
                   onReactionAdd(emoji);
                   setShowPicker(false);
+                  e.stopPropagation();
                 }}
                 className="hover:bg-gray-300 p-2 rounded text-xl"
               >
@@ -69,9 +76,19 @@ function EmojiReactions({ reactions, onReactionAdd }) {
   );
 }
 
-export function Card({ listId, card, onCardUpdate, isDraggable = false }) {
+export function Card({
+  listId,
+  card,
+  onCardUpdate,
+  isDraggable = false,
+  openComments,
+  closeComments,
+  isCommentsOpen,
+  addCommentToCard,
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(card.title);
+
   const textareaRef = useRef(null);
   const [emojiPickerPosition, setEmojiPickerPosition] = useState({
     top: 0,
@@ -190,23 +207,36 @@ export function Card({ listId, card, onCardUpdate, isDraggable = false }) {
       className="bg-white rounded p-2 shadow-sm"
       draggable={isDraggable && !isEditing}
       onDragStart={handleDragStart}
+      onClick={() => {
+        if (!isEditing) openComments(card.id, listId);
+      }}
     >
       {isEditing ? (
-        <div className="flex items-center gap-2">
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-2"
+        >
           <AutosizeTextarea
+            onClick={(e) => e.stopPropagation()}
             value={editedTitle}
             onChange={(e) => setEditedTitle(e.target.value)}
             className="flex-1 min-h-[40px] resize-none"
             autoFocus
           />
           <button
-            onClick={handleSave}
+            onClick={(e) => {
+              handleSave();
+              e.stopPropagation();
+            }}
             className="p-1 hover:bg-green-100 rounded"
           >
             <Check size={15} className="text-green-600" />
           </button>
           <button
-            onClick={handleCancel}
+            onClick={(e) => {
+              handleCancel();
+              e.stopPropagation();
+            }}
             className="p-1 hover:bg-red-100 rounded"
           >
             <X size={15} className="text-red-600" />
@@ -220,13 +250,19 @@ export function Card({ listId, card, onCardUpdate, isDraggable = false }) {
             </p>
             <div className="flex items-center gap-1">
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={(e) => {
+                  setIsEditing(true);
+                  e.stopPropagation();
+                }}
                 className="p-1 hover:bg-gray-100 rounded"
               >
                 <Pencil size={15} className="text-gray-600" />
               </button>
               <button
-                onClick={handleDelete}
+                onClick={(e) => {
+                  handleDelete();
+                  e.stopPropagation();
+                }}
                 className="p-1 hover:bg-gray-100 rounded"
               >
                 <Trash2 size={15} className="text-gray-600" />
